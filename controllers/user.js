@@ -108,7 +108,7 @@ const verifyOTP = async (req, res) => {
     return res.status(200).json({
       status: true,
       message: "Login successful",
-      response: user,
+      response: { user, hasBusiness: !!user.business },
     });
   } catch (error) {
     console.error("verifyOTP error:", error);
@@ -161,7 +161,7 @@ const verifyPin = async (req, res) => {
     return res.status(200).json({
       status: true,
       message: "Login successful",
-      response: user,
+      response: { user, hasBusiness: !!user.business },
     });
   } catch (error) {
     console.log("verifyPin error:", error);

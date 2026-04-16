@@ -1,3 +1,6 @@
+const path = require("path");
+const fs = require("fs").promises;
+
 const Business = require("../models/businessModel");
 const User = require("../models/userModel");
 
@@ -13,11 +16,14 @@ const createBusiness = async (req, res) => {
       plan,
     } = req.body;
 
+    const image = req.file ? req.file.filename : null;
+
     const newBusiness = await Business.create({
       business_name,
       owner: userId,
       business_type,
       address,
+      image,
       business_email,
       business_phone,
       plan,
@@ -71,7 +77,47 @@ const getBusiness = async (req, res) => {
 const updateBusiness = async (req, res) => {
   try {
     const { id } = req.params;
-    const updateData = req.body;
+    const {
+      business_name,
+      business_type,
+      address,
+      business_email,
+      business_phone,
+      plan,
+    } = req.body;
+
+    const newImage = req.file ? req.file.filename : null;
+
+    const business = await Business.findById(id);
+    if (!business) {
+      return res.status(404).json({ status: false, message: "Business not found" });
+    }
+
+    if (newImage && business.image) {
+      const oldImagePath = path.join(
+        __dirname, "..", "uploads", "businesses", business.image,
+      );
+      try {
+        await fs.unlink(oldImagePath);
+        console.log("Old image deleted");
+      } catch (error) {
+        if (error.code == "ENOENT") {
+          console.error("File not found:", error);
+        }
+        console.error("Error deleting old image:", error);
+      }
+    }
+
+    const updateData = {
+      business_name,
+      business_type,
+      address,
+      business_email,
+      business_phone,
+      plan,
+      image: newImage,
+    };
+
     const updatedBusiness = await Business.findByIdAndUpdate(id, updateData, {
       new: true,
     });
