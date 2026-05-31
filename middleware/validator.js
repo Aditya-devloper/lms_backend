@@ -26,8 +26,6 @@ module.exports.validateLead = [
     .isMobilePhone("any")
     .withMessage("Phone number is invalid"),
   body("follow_up_date").notEmpty().withMessage("Follow-up date is required"),
-  body("assigned_to").notEmpty().withMessage("Assigned to is required"),
-  body("business").notEmpty().withMessage("Business is required"),
 ];
 
 module.exports.validateBusiness = [

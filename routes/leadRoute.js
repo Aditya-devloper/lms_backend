@@ -7,6 +7,7 @@ const {
   getLeadById,
   deleteLead,
   updateLead,
+  getLeadActivity,
 } = require("../controllers/lead");
 const { validateLead } = require("../middleware/validator");
 
@@ -24,9 +25,15 @@ router.post(
 );
 
 router.post(
-  "/update/:id",
+  "/updateLead",
   passport.authenticate("jwt", { session: false }),
   updateLead,
+);
+
+router.post(
+  "/getLeadActivity",
+  passport.authenticate("jwt", { session: false }),
+  getLeadActivity,
 );
 
 router.post(

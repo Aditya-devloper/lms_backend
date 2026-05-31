@@ -7,17 +7,39 @@ const leadActivitySchema = new mongoose.Schema(
       ref: "Lead",
       required: true,
     },
-    activity_type: { type: String }, // call, whatsapp, meeting, email
-    description: { type: String },
+
+    business: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Business",
+      required: true,
+    },
+
     created_by: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
-    done_by: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+
+    activity_type: {
+      type: String,
+      enum: [
+        "lead_created",
+        "status_changed",
+        "note_added",
+        "followup_added",
+        "followup_completed",
+        "assigned",
+        "updated",
+        "converted",
+        "lost",
+      ],
       required: true,
+    },
+
+    description: String,
+
+    metadata: {
+      type: mongoose.Schema.Types.Mixed,
     },
   },
   { timestamps: true },
