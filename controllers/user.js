@@ -40,7 +40,7 @@ const sendOTP = async (req, res) => {
     return res.status(200).json({
       status: true,
       message: "OTP sent to your email",
-      response: otp
+      response: otp,
     });
   } catch (error) {
     console.log("sendOTP error:", error);
@@ -83,7 +83,6 @@ const verifyOTP = async (req, res) => {
         message: "Invalid OTP",
       });
     }
-
 
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
       expiresIn: "7d",
@@ -306,16 +305,19 @@ const updateUser = async (req, res) => {
       });
     }
 
-    if (newImage && user.image) {
-      const oldImagePath = path.join(
-        __dirname,
-        "..",
-        "uploads",
-        "users",
-        user.image,
-      );
-      if (fs.existsSync(oldImagePath)) {
-        fs.unlinkSync(oldImagePath);
+    if (newImage) {
+      if (user.image) {
+        const oldImagePath = path.join(
+          __dirname,
+          "..",
+          "uploads",
+          "users",
+          user.image,
+        );
+
+        if (fs.existsSync(oldImagePath)) {
+          fs.unlinkSync(oldImagePath);
+        }
       }
 
       updates.image = newImage;
@@ -343,7 +345,7 @@ const updateUser = async (req, res) => {
 const logoutUser = (req, res) => {
   res.clearCookie("token");
   return res.json({ status: true, message: "Logged out" });
-}
+};
 
 module.exports = {
   sendOTP,
@@ -353,5 +355,5 @@ module.exports = {
   updateUser,
   getUserById,
   removeAgent,
-  logoutUser
+  logoutUser,
 };

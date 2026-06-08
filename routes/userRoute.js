@@ -1,6 +1,7 @@
+const path = require("path");
+const fs = require("fs");
 const router = require("express").Router();
 const multer = require("multer");
-const path = require("path");
 const passport = require("passport");
 
 const {
@@ -17,7 +18,11 @@ const { validateEmail, validateUser } = require("../middleware/validator");
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, path.join(__dirname, "..", "uploads", "users"));
+    const uploadPath = path.join(__dirname, "..", "uploads", "users");
+    if (!fs.existsSync(uploadPath)) {
+      fs.mkdirSync(uploadPath, { recursive: true });
+    }
+    cb(null, uploadPath);
   },
   filename: function (req, file, cb) {
     cb(null, Date.now() + "-" + file.originalname);

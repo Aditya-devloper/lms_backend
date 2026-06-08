@@ -1,3 +1,4 @@
+const path = require("path");
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
@@ -5,7 +6,7 @@ require("dotenv").config();
 const passport = require("passport");
 require("./config/passport")(passport);
 
-const cookieParser = require("cookie-parser")
+const cookieParser = require("cookie-parser");
 const mainRoute = require("./routes/mainRoute");
 
 mongoose
@@ -16,22 +17,24 @@ mongoose
 const app = express();
 
 // Cookie setup
-app.use(cookieParser())
+app.use(cookieParser());
 
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cors({
-  origin: process.env.WEB_URL,
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: process.env.WEB_URL,
+    credentials: true,
+  }),
+);
 
 // Passport middleware
 app.use(passport.initialize());
 
 // Public
-app.use("", express.static("public"));
-app.use("", express.static("uploads"));
+app.use(express.static(path.join(__dirname, "public")));
+app.use("", express.static(path.join(__dirname, "uploads")));
 
 // Routes
 app.use("/api", mainRoute);
