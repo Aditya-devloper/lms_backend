@@ -343,7 +343,11 @@ const updateUser = async (req, res) => {
 };
 
 const logoutUser = (req, res) => {
-  res.clearCookie("token");
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: false, // production me true
+    sameSite: "lax",
+  });
   return res.json({ status: true, message: "Logged out" });
 };
 

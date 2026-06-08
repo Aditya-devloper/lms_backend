@@ -76,8 +76,8 @@ const getBusiness = async (req, res) => {
 
 const updateBusiness = async (req, res) => {
   try {
-    const { id } = req.params;
     const {
+      id,
       business_name,
       business_type,
       address,
@@ -90,12 +90,18 @@ const updateBusiness = async (req, res) => {
 
     const business = await Business.findById(id);
     if (!business) {
-      return res.status(404).json({ status: false, message: "Business not found" });
+      return res
+        .status(404)
+        .json({ status: false, message: "Business not found" });
     }
 
     if (newImage && business.image) {
       const oldImagePath = path.join(
-        __dirname, "..", "uploads", "businesses", business.image,
+        __dirname,
+        "..",
+        "uploads",
+        "businesses",
+        business.image,
       );
       try {
         await fs.unlink(oldImagePath);
@@ -124,7 +130,7 @@ const updateBusiness = async (req, res) => {
     return res.status(200).json({
       status: true,
       message: "Business updated successfully",
-      response: updatedBusiness,
+      // response: updatedBusiness,
     });
   } catch (error) {
     console.log("updateBusiness error:", error);

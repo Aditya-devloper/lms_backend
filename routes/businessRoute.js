@@ -44,7 +44,7 @@ router.post(
 );
 
 router.post(
-  "/update/:id",
+  "/updateBusiness",
   passport.authenticate("jwt", { session: false }),
   isOwner,
   upload.single("image"),
