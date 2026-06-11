@@ -4,6 +4,15 @@ module.exports.validateEmail = [
   body("email").isEmail().withMessage("Please provide a valid email address"),
 ];
 
+module.exports.validateEmailPass = [
+  body("email").isEmail().withMessage("Please provide a valid email address"),
+  body("password")
+    .notEmpty()
+    .withMessage("Password is required")
+    .isLength({ min: 6 })
+    .withMessage("Password must be at least 6 characters long"),
+];
+
 module.exports.validateUser = [
   body("email")
     .notEmpty()

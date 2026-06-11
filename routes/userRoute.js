@@ -13,8 +13,14 @@ const {
   removeAgent,
   updateUser,
   logoutUser,
+  createAccount,
+  googleLogin,
 } = require("../controllers/user");
-const { validateEmail, validateUser } = require("../middleware/validator");
+const {
+  validateEmail,
+  validateUser,
+  validateEmailPass,
+} = require("../middleware/validator");
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -32,6 +38,8 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 router.post("/getOtp", validateEmail, sendOTP);
+router.post("/createAccount", validateEmailPass, createAccount);
+router.post("/googleLogin", googleLogin);
 router.post("/verifyOtp", verifyOTP);
 router.post("/verifyPin", verifyPin);
 

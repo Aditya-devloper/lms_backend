@@ -3,9 +3,12 @@ const fs = require("fs");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { validationResult } = require("express-validator");
+const { OAuth2Client } = require("google-auth-library");
 
 const User = require("../models/userModel");
 const Business = require("../models/businessModel");
+
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const sendOTP = async (req, res) => {
   try {
@@ -44,6 +47,124 @@ const sendOTP = async (req, res) => {
     });
   } catch (error) {
     console.log("sendOTP error:", error);
+    return res.status(500).json({
+      status: false,
+      message: "Internal Server Error",
+      response: error.message,
+    });
+  }
+};
+
+const sendAuthResponse = (res, user, message) => {
+  const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
+    expiresIn: "7d",
+  });
+
+  res.cookie("token", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  });
+
+  return res.status(200).json({
+    status: true,
+    message,
+    response: {
+      user,
+      hasBusiness: !!user.business,
+    },
+  });
+};
+
+const createAccount = async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        status: false,
+        message: "Validation errors",
+        response: errors.array(),
+      });
+    }
+
+    const { email, password } = req.body;
+
+    let user = await User.findOne({ email });
+
+    // Existing user (Login flow)
+    if (user) {
+      if (!user.password) {
+        return res.status(400).json({
+          status: false,
+          message: "No password set for this user",
+        });
+      }
+
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch) {
+        return res.status(400).json({
+          status: false,
+          message: "Incorrect password",
+        });
+      }
+
+      return sendAuthResponse(res, user, "Login successful");
+    }
+
+    // New user (Signup flow)
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    user = await User.create({
+      email,
+      password: hashedPassword,
+    });
+
+    return sendAuthResponse(res, user, "Account created successfully");
+  } catch (error) {
+    console.log("createAccount error:", error);
+    return res.status(500).json({
+      status: false,
+      message: "Internal Server Error",
+      response: error.message,
+    });
+  }
+};
+
+const googleLogin = async (req, res) => {
+  try {
+    const { token } = req.body;
+    const ticket = await client.verifyIdToken({
+      idToken: token,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+    const payload = ticket.getPayload();
+    const { email, name, picture, sub: googleId } = payload;
+
+    let user = await User.findOne({ email });
+
+    if (user) {
+      if (user.provider !== "google") {
+        return res.status(400).json({
+          status: false,
+          message: `Please login using email and password`,
+        });
+      }
+      return sendAuthResponse(res, user, "Login successful");
+    }
+
+    user = await User.create({
+      email,
+      name,
+      googleId,
+      profilePic: picture,
+      provider: "google",
+      is_verified: true,
+    });
+
+    return sendAuthResponse(res, user, "Account created successfully");
+  } catch (error) {
+    console.log("googleLogin error:", error);
     return res.status(500).json({
       status: false,
       message: "Internal Server Error",
@@ -360,4 +481,6 @@ module.exports = {
   getUserById,
   removeAgent,
   logoutUser,
+  createAccount,
+  googleLogin,
 };
