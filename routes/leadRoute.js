@@ -1,5 +1,6 @@
 const router = require("express").Router();
 const passport = require("passport");
+const multer = require("multer");
 
 const {
   createLead,
@@ -8,8 +9,14 @@ const {
   deleteLead,
   updateLead,
   getLeadActivity,
+  exportLeads,
+  uploadLeads,
 } = require("../controllers/lead");
 const { validateLead } = require("../middleware/validator");
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+});
 
 router.post(
   "/getLeads",
@@ -34,6 +41,19 @@ router.post(
   "/getLeadActivity",
   passport.authenticate("jwt", { session: false }),
   getLeadActivity,
+);
+
+router.post(
+  "/exportLeads",
+  passport.authenticate("jwt", { session: false }),
+  exportLeads,
+);
+
+router.post(
+  "/uploadLeads",
+  passport.authenticate("jwt", { session: false }),
+  upload.single("file"),
+  uploadLeads,
 );
 
 router.post(

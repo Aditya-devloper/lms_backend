@@ -21,9 +21,11 @@ const leadSchema = new mongoose.Schema(
       enum: [
         "new",
         "contacted",
+        "qualified",
         "interested",
         "proposal-sent",
         "converted",
+        "negotiation",
         "lost",
       ],
       default: "new",
