@@ -22,8 +22,13 @@ const createLead = async (req, res) => {
     const userId = req.user._id;
     const business_id = req.user.business;
 
-    const { name, email, phone, status, source, follow_up_date, assigned_to } =
-      req.body;
+    let { name, email, phone, status, source, follow_up_date } = req.body;
+
+    if (follow_up_date) {
+      const d = new Date(follow_up_date);
+      d.setUTCHours(6, 30, 0, 0); // UTC 06:30 = IST 12:00 noon, day shift kabhi nahi hoga
+      follow_up_date = d;
+    }
 
     const newLead = await Lead.create({
       created_by: userId,
@@ -54,7 +59,7 @@ const createLead = async (req, res) => {
     console.log("createLead error:", error);
     return res.status(500).json({
       status: false,
-      message: "Internal Server Error",
+      message: "Can't create lead, Please try again",
       response: error.message,
     });
   }
@@ -136,8 +141,8 @@ const getLeads = async (req, res) => {
     const totalLeads = await Lead.countDocuments(query);
 
     const leads = await Lead.find(query)
-      .populate("assigned_to", "name email")
-      .populate("business", "name")
+      // .populate("assigned_to", "name email")
+      // .populate("business", "name")
       .skip(skip)
       .limit(limit)
       .sort({ createdAt: -1 });
@@ -165,7 +170,7 @@ const getLeads = async (req, res) => {
 
 const updateLead = async (req, res) => {
   try {
-    const updateData = req.body;
+    let updateData = req.body;
 
     const oldLead = await Lead.findById(updateData?.id);
 
@@ -174,6 +179,12 @@ const updateLead = async (req, res) => {
         status: false,
         message: "Lead not found",
       });
+    }
+
+    if (updateData.follow_up_date) {
+      const d = new Date(updateData.follow_up_date);
+      d.setUTCHours(6, 30, 0, 0); // UTC 06:30 = IST 12:00 noon, day shift kabhi nahi hoga
+      updateData.follow_up_date = d;
     }
 
     const updatedLead = await Lead.findByIdAndUpdate(
