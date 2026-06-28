@@ -73,6 +73,7 @@ const sendAuthResponse = (res, user, message) => {
     response: {
       user,
       hasBusiness: !!user.business,
+      token,
     },
   });
 };

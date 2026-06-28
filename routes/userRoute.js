@@ -38,7 +38,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 router.post("/getOtp", validateEmail, sendOTP);
-router.post("/createAccount", validateEmailPass, createAccount);
+router.post("/login", validateEmailPass, createAccount);
 router.post("/googleLogin", googleLogin);
 router.post("/verifyOtp", verifyOTP);
 router.post("/verifyPin", verifyPin);
