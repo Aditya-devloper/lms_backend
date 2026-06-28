@@ -180,8 +180,8 @@ const updateLead = async (req, res) => {
     }
 
     if (updateData?.follow_up_date) {
-      updateData?.follow_up_date = new Date(
-        `${updateData?.follow_up_date}T00:00:00`,
+      updateData.follow_up_date = new Date(
+        `${updateData.follow_up_date}T00:00:00`,
       );
     }
 
