@@ -25,9 +25,7 @@ const createLead = async (req, res) => {
     let { name, email, phone, status, source, follow_up_date } = req.body;
 
     if (follow_up_date) {
-      const d = new Date(follow_up_date);
-      d.setUTCHours(6, 30, 0, 0); // UTC 06:30 = IST 12:00 noon, day shift kabhi nahi hoga
-      follow_up_date = d;
+      follow_up_date = new Date(`${follow_up_date}T00:00:00`);
     }
 
     const newLead = await Lead.create({
@@ -181,10 +179,10 @@ const updateLead = async (req, res) => {
       });
     }
 
-    if (updateData.follow_up_date) {
-      const d = new Date(updateData.follow_up_date);
-      d.setUTCHours(6, 30, 0, 0); // UTC 06:30 = IST 12:00 noon, day shift kabhi nahi hoga
-      updateData.follow_up_date = d;
+    if (updateData?.follow_up_date) {
+      updateData?.follow_up_date = new Date(
+        `${updateData?.follow_up_date}T00:00:00`,
+      );
     }
 
     const updatedLead = await Lead.findByIdAndUpdate(
