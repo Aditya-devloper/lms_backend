@@ -50,4 +50,14 @@ leadSchema.index({ source: 1 });
 leadSchema.index({ business: 1 });
 leadSchema.index({ created_by: 1 });
 
+leadSchema.index(
+  { business: 1, phone: 1 },
+  {
+    unique: true,
+    partialFilterExpression: {
+      phone: { $exists: true, $ne: "" },
+    },
+  },
+);
+
 module.exports = mongoose.model("Lead", leadSchema);

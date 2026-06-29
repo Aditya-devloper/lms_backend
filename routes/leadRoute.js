@@ -63,7 +63,7 @@ router.post(
 );
 
 router.post(
-  "/delete/:id",
+  "/deleteLead",
   passport.authenticate("jwt", { session: false }),
   deleteLead,
 );

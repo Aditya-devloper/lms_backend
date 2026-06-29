@@ -22,7 +22,8 @@ const createLead = async (req, res) => {
     const userId = req.user._id;
     const business_id = req.user.business;
 
-    let { name, email, phone, status, source, follow_up_date } = req.body;
+    let { name, email, phone, status, source, follow_up_date, notes } =
+      req.body;
 
     if (follow_up_date) {
       follow_up_date = new Date(`${follow_up_date}T00:00:00`);
@@ -38,6 +39,7 @@ const createLead = async (req, res) => {
       follow_up_date,
       assigned_to: userId,
       business: business_id,
+      notes,
     });
 
     // Create a lead activity record
@@ -55,6 +57,12 @@ const createLead = async (req, res) => {
     });
   } catch (error) {
     console.log("createLead error:", error);
+    if (error.code === 11000) {
+      return res.status(400).json({
+        status: false,
+        message: "Lead with this phone already exists",
+      });
+    }
     return res.status(500).json({
       status: false,
       message: "Can't create lead, Please try again",
@@ -66,6 +74,7 @@ const createLead = async (req, res) => {
 const getLeads = async (req, res) => {
   try {
     const userId = req.user._id;
+    const businessId = req.user.business;
     const {
       status,
       search,
@@ -80,6 +89,7 @@ const getLeads = async (req, res) => {
 
     let query = {
       created_by: userId,
+      business: businessId,
       is_deleted: false,
     };
 
@@ -259,7 +269,17 @@ const updateLead = async (req, res) => {
 
 const deleteLead = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { id } = req.body;
+
+    const leadActivities = await LeadActivity.deleteMany({ lead: id });
+
+    if (!leadActivities) {
+      return res.status(404).json({
+        status: false,
+        message: "Lead activities not found",
+      });
+    }
+
     await Lead.findByIdAndUpdate(id, { is_deleted: true });
     return res.status(200).json({
       status: true,
@@ -269,7 +289,7 @@ const deleteLead = async (req, res) => {
     console.log("deleteLead error:", error);
     return res.status(500).json({
       status: false,
-      message: "Internal Server Error",
+      message: "Can't delete lead, Please try again",
       response: error.message,
     });
   }
