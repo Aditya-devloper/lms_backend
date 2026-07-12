@@ -9,6 +9,7 @@ const User = require("../models/userModel");
 const Business = require("../models/businessModel");
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+const cloudinary = require("../config/cloudinary");
 
 const sendOTP = async (req, res) => {
   try {
@@ -411,14 +412,7 @@ const updateUser = async (req, res) => {
     const { id } = req.params;
     let updates = req.body;
 
-    if (updates?.pin) {
-      const hashedPin = await bcrypt.hash(updates.pin, 10);
-      updates.pin = hashedPin;
-    }
-
-    const newImage = req.file ? req.file.filename : null;
-
-    const user = await User.findById(id);
+    const user = await User.findById(id).select("-password -provider");
 
     if (!user) {
       return res.status(404).json({
@@ -427,22 +421,15 @@ const updateUser = async (req, res) => {
       });
     }
 
-    if (newImage) {
-      if (user.image) {
-        const oldImagePath = path.join(
-          __dirname,
-          "..",
-          "uploads",
-          "users",
-          user.image,
-        );
-
-        if (fs.existsSync(oldImagePath)) {
-          fs.unlinkSync(oldImagePath);
-        }
+    // Naya image aaya hai to
+    if (req.file) {
+      // Purani image ko Cloudinary se delete karo
+      if (user.imagePublicId) {
+        await cloudinary.uploader.destroy(user.imagePublicId);
       }
 
-      updates.image = newImage;
+      updates.image = req.file.path; // Cloudinary secure URL
+      updates.imagePublicId = req.file.filename; // Cloudinary public_id (delete ke liye zaroori)
     }
 
     const updatedUser = await User.findByIdAndUpdate(id, updates, {

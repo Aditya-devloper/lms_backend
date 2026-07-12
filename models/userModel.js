@@ -13,6 +13,7 @@ const userSchema = new mongoose.Schema(
     googleId: { type: String },
     profilePic: { type: String },
     image: { type: String },
+    imagePublicId: { type: String },
     phone: { type: String },
     is_verified: { type: Boolean, default: false },
     user_type: {
