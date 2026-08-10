@@ -186,10 +186,25 @@ const getBusinessById = async (req, res) => {
   }
 };
 
+const getBusinessContext = async (businessId) => {
+  const business = await Business.findById(businessId);
+
+  if (!business) {
+    return { name: "the business", type: "", description: "" };
+  }
+
+  return {
+    name: business?.name || "the business",
+    type: business?.business_type || "",
+    description: business?.description || "",
+  };
+};
+
 module.exports = {
   createBusiness,
   getBusiness,
   updateBusiness,
   deleteBusiness,
   getBusinessById,
+  getBusinessContext,
 };

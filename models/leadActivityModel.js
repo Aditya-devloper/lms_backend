@@ -28,6 +28,7 @@ const leadActivitySchema = new mongoose.Schema(
         "note_added",
         "followup_added",
         "followup_completed",
+        "ai_call_completed",
         "assigned",
         "updated",
         "converted",
@@ -36,7 +37,7 @@ const leadActivitySchema = new mongoose.Schema(
       required: true,
     },
 
-    description: String,
+    description: { type: String, trim: true },
 
     metadata: {
       type: mongoose.Schema.Types.Mixed,

@@ -15,7 +15,7 @@ const leadSchema = new mongoose.Schema(
     name: { type: String, required: true },
     email: { type: String },
     phone: { type: String },
-    notes: { type: String },
+    notes: { type: String, trim: true },
     status: {
       type: String,
       enum: [
@@ -30,12 +30,22 @@ const leadSchema = new mongoose.Schema(
       ],
       default: "new",
     },
-    source: { type: String }, // email, phone, referral, website, call, whatsapp, email
+    source: { type: String, trim: true }, // email, phone, referral, website, call, whatsapp, email
     follow_up_date: { type: Date, required: true },
     assigned_to: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
+
+    call_attempts: { type: Number, default: 0 },
+    last_call_at: { type: Date },
+    last_call_status: {
+      type: String,
+      enum: ["not_called", "no_answer", "completed", "failed"],
+      default: "not_called",
+    },
+    last_call_result: { type: mongoose.Schema.Types.Mixed }, // CALL-E ka structuredResult yahan store hoga
+    call_summary: { type: String, trim: true },
 
     is_deleted: { type: Boolean, default: false },
   },

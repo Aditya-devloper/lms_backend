@@ -120,7 +120,9 @@ const getLeads = async (req, res) => {
         const start = new Date();
         start.setDate(start.getDate() - 30);
         start.setHours(0, 0, 0, 0);
-        query.createdAt = { $gte: start, $lte: now };
+        const end = new Date();
+        end.setHours(23, 59, 59, 999);
+        query.createdAt = { $gte: start, $lte: end };
         break;
       }
 
@@ -128,7 +130,9 @@ const getLeads = async (req, res) => {
         const start = new Date();
         start.setDate(start.getDate() - 60);
         start.setHours(0, 0, 0, 0);
-        query.createdAt = { $gte: start, $lte: now };
+        const end = new Date();
+        end.setHours(23, 59, 59, 999);
+        query.createdAt = { $gte: start, $lte: end };
         break;
       }
 
@@ -357,8 +361,6 @@ const getLeadActivity = async (req, res) => {
 // export
 const exportLeads = async (req, res) => {
   try {
-    console.log("exports hitt..");
-
     const userId = req.user._id;
     const { status, search, source, assigned_to, from, to, date_type } =
       req.body;
@@ -424,7 +426,7 @@ const exportLeads = async (req, res) => {
       .populate("assigned_to", "name email")
       .sort({ createdAt: -1 });
 
-    console.log("exports leads:", leads);
+    // console.log("exports leads:", leads);
 
     const leadsData = leads.map((lead) => ({
       Name: lead?.name || "",

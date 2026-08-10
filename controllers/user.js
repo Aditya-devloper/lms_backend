@@ -90,7 +90,7 @@ const createAccount = async (req, res) => {
       });
     }
 
-    const { email, password } = req.body;
+    const { name, email, password } = req.body;
 
     let user = await User.findOne({ email });
 
@@ -118,8 +118,16 @@ const createAccount = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     user = await User.create({
+      name,
       email,
       password: hashedPassword,
+      is_verified: true,
+      plan: {
+        name: "free",
+        start_date: new Date(),
+        end_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 days from now
+        is_active: true,
+      },
     });
 
     return sendAuthResponse(res, user, "Account created successfully");
@@ -162,6 +170,12 @@ const googleLogin = async (req, res) => {
       profilePic: picture,
       provider: "google",
       is_verified: true,
+      plan: {
+        name: "free",
+        start_date: new Date(),
+        end_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 days from now
+        is_active: true,
+      },
     });
 
     return sendAuthResponse(res, user, "Account created successfully");
