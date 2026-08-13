@@ -24,7 +24,8 @@ const callHistorySchema = new mongoose.Schema(
       required: true,
     },
     call_result: { type: mongoose.Schema.Types.Mixed }, // structuredResult from CALL-E
-    cost_charged: { type: Number, default: 0 }, // kitna credit is call ke liye kata
+    internal_cost: { type: Number, default: 0, select: false }, // call-e cost
+    was_charged: { type: Boolean, default: false },
     attempt_number: { type: Number, default: 1 },
     request_id: { type: String }, // idempotency tracking se link karne ke liye
   },

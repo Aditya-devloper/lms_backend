@@ -17,7 +17,7 @@ const buildTask = async (state) => {
   const prompt = `You are writing call instructions for an AI calling agent representing ${business.name}${
     business.type ? `, a ${business.type} business` : ""
   }.
- 
+  
   Recipient phone number (E.164 format, MUST be included exactly as given): ${leadData.phone}
   Lead name: ${leadData.name}
   Lead notes: ${leadData.notes || "none"}
@@ -26,6 +26,10 @@ const buildTask = async (state) => {
   
   Write a short, natural "task" instruction (2-3 sentences) telling the calling agent
   who to call and what to say/ask. ${userContext ? "Incorporate the business owner's specific instruction, while staying consistent with the business context." : "Focus on qualifying interest and confirming a next step."}
+  
+  The agent should naturally try to learn: what the lead is looking for, their budget or
+  spending capacity (if it comes up naturally — don't interrogate), and how soon they want
+  to move forward. This helps score the lead accurately afterward.
   
   MANDATORY — the task text MUST explicitly instruct the agent to introduce itself as
   calling on behalf of "${business.name}". Never omit this, even when a specific
@@ -37,7 +41,6 @@ const buildTask = async (state) => {
   
   The instruction MUST start with:
   "Call +${leadData.phone} and introduce yourself as calling from ${business.name}, then ..."
-  Focus on qualifying interest and confirming a next step.
   Return ONLY the task text, nothing else.`;
 
   const response = await model.invoke(prompt);

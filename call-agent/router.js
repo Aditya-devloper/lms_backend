@@ -15,11 +15,11 @@ const decideNextStep = (state) => {
   }
 
   if (callStatus === "completed" && callResult) {
-    if (callResult.interested === "yes") {
-      return "mark_interested";
-    }
     if (callResult.interested === "no") {
       return "mark_not_interested";
+    }
+    if (callResult.lead_score === "hot") {
+      return "mark_hot";
     }
     return "schedule_followup";
   }
@@ -27,4 +27,4 @@ const decideNextStep = (state) => {
   return "end";
 };
 
-module.exports = { decideNextStep };
+module.exports = { decideNextStep, MAX_ATTEMPTS };

@@ -6,10 +6,10 @@ const { buildTask } = require("./nodes/buildTask");
 const { triggerCall } = require("./nodes/triggerCall");
 const {
   processResult,
-  markInterested,
   markNotInterested,
   scheduleFollowup,
   incrementAttempt,
+  markHot,
 } = require("./nodes/processResult");
 const { decideNextStep } = require("./router");
 
@@ -20,7 +20,7 @@ const workflow = new StateGraph(AgentState)
   .addNode("triggerCall", triggerCall)
   .addNode("processResult", processResult)
   .addNode("incrementAttempt", incrementAttempt)
-  .addNode("markInterested", markInterested)
+  .addNode("markHot", markHot)
   .addNode("markNotInterested", markNotInterested)
   .addNode("scheduleFollowup", scheduleFollowup)
 
@@ -32,14 +32,14 @@ const workflow = new StateGraph(AgentState)
 
   .addConditionalEdges("processResult", decideNextStep, {
     retry: "incrementAttempt",
-    mark_interested: "markInterested",
+    mark_hot: "markHot",
     mark_not_interested: "markNotInterested",
     schedule_followup: "scheduleFollowup",
     end: "__end__",
   })
 
   .addEdge("incrementAttempt", "triggerCall")
-  .addEdge("markInterested", "__end__")
+  .addEdge("markHot", "__end__")
   .addEdge("markNotInterested", "__end__")
   .addEdge("scheduleFollowup", "__end__");
 

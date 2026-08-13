@@ -1,5 +1,5 @@
 const crypto = require("crypto");
-const { graph } = require("../agent/graph");
+const { graph } = require("../call-agent/graph");
 const Business = require("../models/businessModel");
 const CallHistory = require("../models/callHistoryModel");
 
@@ -17,10 +17,10 @@ const triggerCallAgent = async (req, res) => {
     }
 
     const business = await Business.findById(business_id);
-    if (!business || business.call_credits < CALL_COST) {
+    if (!business || business.call_balance < 1) {
       return res.status(402).json({
         status: false,
-        message: "Insufficient call credits. Please recharge to continue.",
+        message: "No calls remaining. Please purchase a call pack to continue.",
       });
     }
 
@@ -120,7 +120,7 @@ const getCallStats = async (req, res) => {
 
             usedCredits: {
               $sum: {
-                $ifNull: ["$cost_charged", 0],
+                $cond: [{ $eq: ["$was_charged", true] }, 1, 0],
               },
             },
           },
@@ -136,7 +136,7 @@ const getCallStats = async (req, res) => {
         },
       ]),
 
-      Business.findById(businessId).select("call_credits").lean(),
+      Business.findById(businessId).select("call_balance").lean(),
     ]);
 
     const callStats = stats[0] || {
@@ -151,7 +151,7 @@ const getCallStats = async (req, res) => {
       message: "Call stats fetched",
       response: {
         ...callStats,
-        creditsRemaining: business?.call_credits ?? 0,
+        creditsRemaining: business?.call_balance ?? 0,
       },
     });
   } catch (error) {

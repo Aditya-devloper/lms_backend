@@ -1,8 +1,8 @@
 const fs = require("fs");
-const { parseFile } = require("../agent/rag/fileParser");
-const { ingestDocument } = require("../agent/rag/ingest");
-const { retrieveRelevantChunks } = require("../agent/rag/retriever");
-const { getModel } = require("../agent/llmModel");
+const { parseFile } = require("../call-agent/rag/fileParser");
+const { ingestDocument } = require("../call-agent/rag/ingest");
+const { retrieveRelevantChunks } = require("../call-agent/rag/retriever");
+const { getModel } = require("../call-agent/llmModel");
 const BusinessKnowledge = require("../models/businessKnowledge");
 const { getBusinessContext } = require("./business");
 

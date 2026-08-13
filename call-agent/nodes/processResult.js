@@ -25,7 +25,7 @@ const processResult = async (state) => {
   await LeadActivity.create({
     lead: state.leadId,
     business: lead.business,
-    created_by: lead.created_by, // AI ne trigger kiya, but account-owner ke against attribute karte
+    created_by: lead.created_by,
     activity_type: "ai_call_completed",
     description:
       state.callStatus === "completed"
@@ -33,8 +33,12 @@ const processResult = async (state) => {
         : `AI agent's call attempt ${state.callStatus === "failed" ? "failed" : "went unanswered"}`,
     metadata: {
       callStatus: state.callStatus,
-      interested: state.callResult?.interested || null,
-      preferredDay: state.callResult?.preferred_day || null,
+      interested: state.callResult?.interested,
+      leadScore: state.callResult?.lead_score,
+      requirement: state.callResult?.requirement_summary,
+      budget: state.callResult?.budget_mentioned,
+      timeline: state.callResult?.timeline,
+      preferredFollowup: state.callResult?.preferred_followup,
       attemptNumber: state.attemptNumber,
     },
   });
@@ -45,40 +49,6 @@ const processResult = async (state) => {
 const incrementAttempt = async (state) => ({
   attemptNumber: state.attemptNumber + 1,
 });
-
-const markInterested = async (state) => {
-  console.log("markInterested node comes");
-  const lead = await Lead.findById(state.leadId);
-  const previousStatus = lead.status;
-  const previousFollowUp = lead.follow_up_date;
-
-  lead.status = "interested";
-
-  const preferredDate = parsePreferredDay(state.callResult?.preferred_day);
-  if (preferredDate) lead.follow_up_date = preferredDate;
-
-  await lead.save();
-
-  await LeadActivity.create({
-    lead: state.leadId,
-    business: lead.business,
-    created_by: lead.created_by,
-    activity_type: "status_changed",
-    description: `Status changed to "interested" based on AI call outcome${
-      preferredDate && ` — lead prefers ${state.callResult.preferred_day}`
-    }`,
-    metadata: {
-      from: previousStatus,
-      to: "interested",
-      ...(preferredDate && {
-        followUpFrom: previousFollowUp,
-        followUpTo: preferredDate,
-      }),
-    },
-  });
-
-  return {};
-};
 
 const markNotInterested = async (state) => {
   console.log("markNotInterested node comes");
@@ -105,20 +75,28 @@ const scheduleFollowup = async (state) => {
   const lead = await Lead.findById(state.leadId);
   const previousStatus = lead.status;
   const previousFollowUp = lead.follow_up_date;
+  const { callResult } = state;
 
-  // Pehle try karo lead ne khud jo din bola usko use karna
-  let followUpDate = parsePreferredDay(state.callResult?.preferred_day);
+  let followUpDate = parsePreferredDay(callResult?.preferred_followup);
   let source = "lead_stated";
 
-  // Agar lead ne koi specific din nahi bola, ya parse nahi ho paya — tabhi default fallback
   if (!followUpDate) {
     followUpDate = new Date();
     followUpDate.setDate(followUpDate.getDate() + 3);
     source = "default_fallback";
   }
 
-  lead.status = "contacted";
+  lead.status = "contacted"; // warm — AI follow-up later
   lead.follow_up_date = followUpDate;
+
+  if (
+    callResult.budget_mentioned &&
+    callResult.budget_mentioned !== "not discussed"
+  ) {
+    lead.notes =
+      `${lead.notes || ""}\n[AI Call] Budget: ${callResult.budget_mentioned}. Requirement: ${callResult.requirement_summary || "N/A"}. Timeline: ${callResult.timeline || "N/A"}.`.trim();
+  }
+
   await lead.save();
 
   await LeadActivity.create({
@@ -128,17 +106,66 @@ const scheduleFollowup = async (state) => {
     activity_type: "followup_added",
     description:
       source === "lead_stated"
-        ? `Follow-up scheduled based on lead's preference ("${state.callResult.preferred_day}")`
-        : `Default Follow-up scheduled (lead didn't give a clear date)`,
-    metadata: { from: previousFollowUp, to: followUpDate, source },
+        ? `Follow-up scheduled (warm lead) based on lead's stated preference`
+        : `Follow-up scheduled (warm lead, default timing)`,
+    metadata: {
+      from: previousFollowUp,
+      to: followUpDate,
+      source,
+      leadScore: "warm",
+      budget: callResult.budget_mentioned,
+      timeline: callResult.timeline,
+    },
   });
 
   return {};
 };
 
+const markHot = async (state) => {
+  console.log("markHot node comes");
+  const lead = await Lead.findById(state.leadId);
+  const previousStatus = lead.status;
+  const { callResult } = state;
+
+  lead.status = "qualified";
+
+  // Call se mile insights ko lead pe hi save kar do
+  if (
+    callResult.budget_mentioned &&
+    callResult.budget_mentioned !== "not discussed"
+  ) {
+    lead.notes =
+      `${lead.notes || ""}\n[AI Call] Budget: ${callResult.budget_mentioned}. Requirement: ${callResult.requirement_summary || "N/A"}.`.trim();
+  }
+
+  await lead.save();
+
+  await LeadActivity.create({
+    lead: state.leadId,
+    business: lead.business,
+    created_by: lead.created_by,
+    activity_type: "status_changed",
+    description: `Marked as HOT lead by AI — ready for human follow-up`,
+    metadata: {
+      from: previousStatus,
+      to: "qualified",
+      leadScore: "hot",
+      budget: callResult.budget_mentioned,
+      timeline: callResult.timeline,
+      requirement: callResult.requirement_summary,
+    },
+  });
+
+  // TODO: Actual notification (email/push/Slack) to assigned salesperson
+  console.log(
+    `HOT lead alert: ${lead.name} (${lead._id}) needs human follow-up`,
+  );
+  return {};
+};
+
 module.exports = {
   processResult,
-  markInterested,
+  markHot,
   markNotInterested,
   scheduleFollowup,
   incrementAttempt,

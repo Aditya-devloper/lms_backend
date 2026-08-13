@@ -13,8 +13,7 @@ const businessSchema = new mongoose.Schema(
     address: { type: String, trim: true },
     business_email: { type: String },
     business_phone: { type: String },
-    enable_calle: { type: Boolean, default: false },
-    call_credits: { type: Number },
+    call_balance: { type: Number, default: 10 },
     plan: {
       name: {
         type: String,
