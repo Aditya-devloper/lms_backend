@@ -1,5 +1,4 @@
 const router = require("express").Router();
-const passport = require("passport");
 const {
   createSubscriptionOrder,
   confirmSubscription,
@@ -7,35 +6,16 @@ const {
   getAllTransactions,
   exportTransactions,
 } = require("../controllers/subscription");
+const { authMiddleware } = require("../middleware/auth");
 
-router.post(
-  "/getAllTransactions",
-  passport.authenticate("jwt", { session: false }),
-  getAllTransactions,
-);
+router.post("/getAllTransactions", authMiddleware, getAllTransactions);
 
-router.post(
-  "/exportTransactions",
-  passport.authenticate("jwt", { session: false }),
-  exportTransactions,
-);
+router.post("/exportTransactions", authMiddleware, exportTransactions);
 
-router.post(
-  "/create-order",
-  passport.authenticate("jwt", { session: false }),
-  createSubscriptionOrder,
-);
+router.post("/create-order", authMiddleware, createSubscriptionOrder);
 
-router.post(
-  "/confirmSubscription",
-  passport.authenticate("jwt", { session: false }),
-  confirmSubscription,
-);
+router.post("/confirmSubscription", authMiddleware, confirmSubscription);
 
-router.post(
-  "/checkPaymentStatus",
-  passport.authenticate("jwt", { session: false }),
-  checkPaymentStatus,
-);
+router.post("/checkPaymentStatus", authMiddleware, checkPaymentStatus);
 
 module.exports = router;

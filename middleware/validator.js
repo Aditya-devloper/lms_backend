@@ -1,4 +1,5 @@
 const { body } = require("express-validator");
+const { isValidPhoneNumber } = require("libphonenumber-js");
 
 module.exports.validateEmail = [
   body("email").isEmail().withMessage("Please provide a valid email address"),
@@ -18,10 +19,16 @@ module.exports.validateUser = [
     .notEmpty()
     .isEmail()
     .withMessage("Please provide a valid email address"),
+
   body("phone")
     .optional({ checkFalsy: true })
-    .isMobilePhone("any")
-    .withMessage("Phone number is invalid"),
+    .custom((value) => {
+      if (!isValidPhoneNumber(value)) {
+        throw new Error("Phone number is invalid");
+      }
+
+      return true;
+    }),
 ];
 
 module.exports.validateLead = [
@@ -30,10 +37,17 @@ module.exports.validateLead = [
     .optional({ checkFalsy: true })
     .isEmail()
     .withMessage("Email is invalid"),
+
   body("phone")
     .optional({ checkFalsy: true })
-    .isMobilePhone("any")
-    .withMessage("Phone number is invalid"),
+    .custom((value) => {
+      if (!isValidPhoneNumber(value)) {
+        throw new Error("Phone number is invalid");
+      }
+
+      return true;
+    }),
+
   body("follow_up_date").notEmpty().withMessage("Follow-up date is required"),
 ];
 
@@ -43,8 +57,14 @@ module.exports.validateBusiness = [
     .optional({ checkFalsy: true })
     .isEmail()
     .withMessage("Email is invalid"),
+
   body("business_phone")
     .optional({ checkFalsy: true })
-    .isMobilePhone("any")
-    .withMessage("Phone number is invalid"),
+    .custom((value) => {
+      if (!isValidPhoneNumber(value)) {
+        throw new Error("Phone number is invalid");
+      }
+
+      return true;
+    }),
 ];

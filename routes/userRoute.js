@@ -1,7 +1,6 @@
 const path = require("path");
 const fs = require("fs");
 const router = require("express").Router();
-const passport = require("passport");
 const cloudinary = require("../config/cloudinary");
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
 const multer = require("multer");
@@ -23,6 +22,7 @@ const {
   validateUser,
   validateEmailPass,
 } = require("../middleware/validator");
+const { authMiddleware } = require("../middleware/auth");
 
 // Multer storge
 // const storage = multer.diskStorage({
@@ -58,27 +58,19 @@ router.post("/verifyPin", verifyPin);
 
 router.post(
   "/createAgent",
-  passport.authenticate("jwt", { session: false }),
+  authMiddleware,
   validateUser,
   upload.single("image"),
   createAgent,
 );
 
-router.post(
-  "/getUserById",
-  passport.authenticate("jwt", { session: false }),
-  getUserById,
-);
+router.post("/getUserById", authMiddleware, getUserById);
 
-router.post(
-  "/logoutUser",
-  passport.authenticate("jwt", { session: false }),
-  logoutUser,
-);
+router.post("/logoutUser", authMiddleware, logoutUser);
 
 router.post(
   "/update/:id",
-  passport.authenticate("jwt", { session: false }),
+  authMiddleware,
   validateUser,
   // upload.single("image"),
   (req, res, next) => {
@@ -101,10 +93,6 @@ router.post(
   updateUser,
 );
 
-router.post(
-  "/removeAgent/:id",
-  passport.authenticate("jwt", { session: false }),
-  removeAgent,
-);
+router.post("/removeAgent/:id", authMiddleware, removeAgent);
 
 module.exports = router;

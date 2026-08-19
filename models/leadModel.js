@@ -36,6 +36,7 @@ const leadSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
+    type: { type: String, enum: ["manual", "ai_agent"], default: "manual" },
 
     call_attempts: { type: Number, default: 0 },
     last_call_at: { type: Date },
@@ -54,7 +55,6 @@ const leadSchema = new mongoose.Schema(
 
 leadSchema.index({ name: 1 });
 leadSchema.index({ email: 1 });
-leadSchema.index({ phone: 1 });
 leadSchema.index({ status: 1 });
 leadSchema.index({ source: 1 });
 leadSchema.index({ business: 1 });

@@ -57,9 +57,13 @@ const sendOTP = async (req, res) => {
 };
 
 const sendAuthResponse = (res, user, message) => {
-  const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
-    expiresIn: "7d",
-  });
+  const token = jwt.sign(
+    { userId: user._id, user_type: "owner" },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: "7d",
+    },
+  );
 
   res.cookie("token", token, {
     httpOnly: true,

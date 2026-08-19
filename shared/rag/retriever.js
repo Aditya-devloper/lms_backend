@@ -28,6 +28,8 @@ const retrieveRelevantChunks = async ({ businessId, query, topK = 5 }) => {
     },
   ]);
 
+  // console.log("retrieveRelevantChunks", results);
+
   return results.map((r) => r.chunkText);
 };
 

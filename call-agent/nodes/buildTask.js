@@ -1,4 +1,4 @@
-const { getModel } = require("../llmModel");
+const { getModel } = require("../../shared/llmModel");
 const { getBusinessContext } = require("../../controllers/business");
 
 const buildTask = async (state) => {
@@ -40,7 +40,7 @@ const buildTask = async (state) => {
   rather than making anything up.
   
   The instruction MUST start with:
-  "Call +${leadData.phone} and introduce yourself as calling from ${business.name}, then ..."
+  "Call ${leadData.phone} and introduce yourself as calling from ${business.name}, then ..."
   Return ONLY the task text, nothing else.`;
 
   const response = await model.invoke(prompt);

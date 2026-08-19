@@ -84,6 +84,7 @@ const updateBusiness = async (req, res) => {
       business_email,
       business_phone,
       plan,
+      widget_config,
     } = req.body;
 
     const newImage = req.file ? req.file.filename : null;
@@ -122,6 +123,7 @@ const updateBusiness = async (req, res) => {
       business_phone,
       plan,
       image: newImage,
+      widget_config,
     };
 
     const updatedBusiness = await Business.findByIdAndUpdate(id, updateData, {
@@ -200,6 +202,34 @@ const getBusinessContext = async (businessId) => {
   };
 };
 
+const getWidgetConfig = async (req, res) => {
+  try {
+    const { businessId } = req.params;
+    const widget_config =
+      await Business.findById(businessId).select("widget_config");
+
+    if (!widget_config) {
+      return res.status(404).json({
+        status: false,
+        message: "widget_config not found",
+      });
+    }
+
+    return res.status(200).json({
+      status: true,
+      message: "Widget config fetched successfully",
+      response: widget_config,
+    });
+  } catch (error) {
+    console.log("getWidgetConfig error:", error);
+    return res.status(500).json({
+      status: false,
+      message: "Internal Server Error",
+      response: error.message,
+    });
+  }
+};
+
 module.exports = {
   createBusiness,
   getBusiness,
@@ -207,4 +237,5 @@ module.exports = {
   deleteBusiness,
   getBusinessById,
   getBusinessContext,
+  getWidgetConfig,
 };

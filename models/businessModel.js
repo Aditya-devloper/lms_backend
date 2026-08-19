@@ -14,6 +14,7 @@ const businessSchema = new mongoose.Schema(
     business_email: { type: String },
     business_phone: { type: String },
     call_balance: { type: Number, default: 10 },
+    chat_message_balance: { type: Number, default: 10 },
     plan: {
       name: {
         type: String,
@@ -26,6 +27,32 @@ const businessSchema = new mongoose.Schema(
       is_active: { type: Boolean },
       agent_limit: { type: Number, default: 1 },
       lead_limit: { type: Number, default: 50 },
+
+      included_calls: { type: Number, default: 0 },
+      included_chat_messages: { type: Number, default: 0 },
+
+      calls_used: { type: Number, default: 0 },
+      chat_messages_used: { type: Number, default: 0 },
+    },
+
+    widget_config: {
+      primaryColor: { type: String, default: "#7c3aed" },
+      icon: {
+        type: String,
+        enum: ["chat", "sparkles", "headset", "bot"],
+        default: "chat",
+      },
+      welcomeTitle: {
+        type: String,
+        default: "Chat with our team",
+        maxlength: 60,
+      },
+      welcomeSubtitle: {
+        type: String,
+        default: "Typically replies within a few minutes",
+        maxlength: 100,
+      },
+      suggestions: [{ type: String }],
     },
   },
   { timestamps: true },

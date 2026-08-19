@@ -10,7 +10,7 @@ const getModel = async () => {
 
   if (provider === "groq") {
     cachedModel = new ChatGroq({
-      model: "llama-3.3-70b-versatile",
+      model: "openai/gpt-oss-120b",
       temperature: 0.3,
       // maxTokens: undefined,
       maxRetries: 2,

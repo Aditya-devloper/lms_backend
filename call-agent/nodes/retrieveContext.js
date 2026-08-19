@@ -1,7 +1,7 @@
-const { retrieveRelevantChunks } = require("../rag/retriever");
+const { retrieveRelevantChunks } = require("../../shared/rag/retriever");
 
 const retrieveContext = async (state) => {
-  console.log("retrieveContext node comes");
+  console.log("retrieveContext node comes (call)");
 
   const { leadData } = state;
 

@@ -1,5 +1,4 @@
 const router = require("express").Router();
-const passport = require("passport");
 const multer = require("multer");
 
 const {
@@ -13,59 +12,26 @@ const {
   uploadLeads,
 } = require("../controllers/lead");
 const { validateLead } = require("../middleware/validator");
+const { authMiddleware } = require("../middleware/auth");
 
 const upload = multer({
   storage: multer.memoryStorage(),
 });
 
-router.post(
-  "/getLeads",
-  passport.authenticate("jwt", { session: false }),
-  getLeads,
-);
+router.post("/getLeads", authMiddleware, getLeads);
 
-router.post(
-  "/createLead",
-  passport.authenticate("jwt", { session: false }),
-  validateLead,
-  createLead,
-);
+router.post("/createLead", authMiddleware, validateLead, createLead);
 
-router.post(
-  "/updateLead",
-  passport.authenticate("jwt", { session: false }),
-  updateLead,
-);
+router.post("/updateLead", authMiddleware, updateLead);
 
-router.post(
-  "/getLeadActivity",
-  passport.authenticate("jwt", { session: false }),
-  getLeadActivity,
-);
+router.post("/getLeadActivity", authMiddleware, getLeadActivity);
 
-router.post(
-  "/exportLeads",
-  passport.authenticate("jwt", { session: false }),
-  exportLeads,
-);
+router.post("/exportLeads", authMiddleware, exportLeads);
 
-router.post(
-  "/uploadLeads",
-  passport.authenticate("jwt", { session: false }),
-  upload.single("file"),
-  uploadLeads,
-);
+router.post("/uploadLeads", authMiddleware, upload.single("file"), uploadLeads);
 
-router.post(
-  "/getById/:id",
-  passport.authenticate("jwt", { session: false }),
-  getLeadById,
-);
+router.post("/getById/:id", authMiddleware, getLeadById);
 
-router.post(
-  "/deleteLead",
-  passport.authenticate("jwt", { session: false }),
-  deleteLead,
-);
+router.post("/deleteLead", authMiddleware, deleteLead);
 
 module.exports = router;

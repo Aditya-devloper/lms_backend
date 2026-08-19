@@ -1,11 +1,7 @@
 const router = require("express").Router();
-const passport = require("passport");
 const { getDashboardData } = require("../controllers/dashboard");
+const { authMiddleware } = require("../middleware/auth");
 
-router.post(
-  "/getDashboardData",
-  passport.authenticate("jwt", { session: false }),
-  getDashboardData,
-);
+router.post("/getDashboardData", authMiddleware, getDashboardData);
 
 module.exports = router;

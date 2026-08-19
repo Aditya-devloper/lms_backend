@@ -3,8 +3,6 @@ const { graph } = require("../call-agent/graph");
 const Business = require("../models/businessModel");
 const CallHistory = require("../models/callHistoryModel");
 
-const CALL_COST = Number(process.env.CALL_COST) || 0.06;
-
 const triggerCallAgent = async (req, res) => {
   try {
     const business_id = req.user?.business;

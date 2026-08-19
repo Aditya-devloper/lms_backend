@@ -2,16 +2,17 @@ const path = require("path");
 const fs = require("fs");
 const router = require("express").Router();
 const multer = require("multer");
-const passport = require("passport");
 
 const {
   getBusiness,
   createBusiness,
   updateBusiness,
   getBusinessById,
+  getWidgetConfig,
 } = require("../controllers/business");
 const { isOwner } = require("../middleware/permissions");
 const { validateBusiness } = require("../middleware/validator");
+const { authMiddleware } = require("../middleware/auth");
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -28,15 +29,11 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-router.post(
-  "/getBusiness",
-  passport.authenticate("jwt", { session: false }),
-  getBusiness,
-);
+router.post("/getBusiness", authMiddleware, getBusiness);
 
 router.post(
   "/createBusiness",
-  passport.authenticate("jwt", { session: false }),
+  authMiddleware,
   isOwner,
   validateBusiness,
   upload.single("image"),
@@ -45,16 +42,14 @@ router.post(
 
 router.post(
   "/updateBusiness",
-  passport.authenticate("jwt", { session: false }),
+  authMiddleware,
   isOwner,
   upload.single("image"),
   updateBusiness,
 );
 
-router.post(
-  "/getById/:id",
-  passport.authenticate("jwt", { session: false }),
-  getBusinessById,
-);
+router.post("/getById/:id", authMiddleware, getBusinessById);
+
+router.post("/getWidgetConfig/:businessId", getWidgetConfig);
 
 module.exports = router;

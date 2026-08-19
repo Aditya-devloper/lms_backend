@@ -4,14 +4,20 @@ const user = require("./userRoute");
 const lead = require("./leadRoute");
 const business = require("./businessRoute");
 const dashboard = require("./dashboard");
-const agent = require("./agentRoute");
+const callAgent = require("./callAgentRoute");
+const rag = require("./ragRoute");
 const subscription = require("./subscriptionRoute");
+const chatAgent = require("./chatAgentRoute");
+const userAgent = require("./userAgentRoute");
 
 router.use("/user", user);
 router.use("/lead", lead);
 router.use("/business", business);
 router.use("/dashboard", dashboard);
-router.use("/agent", agent);
+router.use("/call-agent", callAgent);
+router.use("/rag", rag);
 router.use("/subscription", subscription);
+router.use("/chat-agent", chatAgent);
+router.use("/human-agent", userAgent);
 
 module.exports = router;
