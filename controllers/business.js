@@ -182,8 +182,7 @@ const getBusinessById = async (req, res) => {
     console.log("getBusinessById error:", error);
     return res.status(500).json({
       status: false,
-      message: "Internal Server Error",
-      response: error.message,
+      message: error.message || "Internal Server Error",
     });
   }
 };

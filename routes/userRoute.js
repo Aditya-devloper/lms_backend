@@ -9,19 +9,19 @@ const {
   sendOTP,
   verifyOTP,
   verifyPin,
-  createAgent,
   getUserById,
-  removeAgent,
   updateUser,
   logoutUser,
   createAccount,
   googleLogin,
 } = require("../controllers/user");
+
 const {
   validateEmail,
   validateUser,
   validateEmailPass,
 } = require("../middleware/validator");
+
 const { authMiddleware } = require("../middleware/auth");
 
 // Multer storge
@@ -56,14 +56,6 @@ router.post("/googleLogin", googleLogin);
 router.post("/verifyOtp", verifyOTP);
 router.post("/verifyPin", verifyPin);
 
-router.post(
-  "/createAgent",
-  authMiddleware,
-  validateUser,
-  upload.single("image"),
-  createAgent,
-);
-
 router.post("/getUserById", authMiddleware, getUserById);
 
 router.post("/logoutUser", authMiddleware, logoutUser);
@@ -92,7 +84,5 @@ router.post(
   },
   updateUser,
 );
-
-router.post("/removeAgent/:id", authMiddleware, removeAgent);
 
 module.exports = router;

@@ -9,6 +9,7 @@ const rag = require("./ragRoute");
 const subscription = require("./subscriptionRoute");
 const chatAgent = require("./chatAgentRoute");
 const userAgent = require("./userAgentRoute");
+const plan = require("./planRoute");
 
 router.use("/user", user);
 router.use("/lead", lead);
@@ -19,5 +20,6 @@ router.use("/rag", rag);
 router.use("/subscription", subscription);
 router.use("/chat-agent", chatAgent);
 router.use("/human-agent", userAgent);
+router.use("/plan", plan);
 
 module.exports = router;

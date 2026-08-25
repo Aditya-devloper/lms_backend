@@ -313,52 +313,6 @@ const verifyPin = async (req, res) => {
   }
 };
 
-const createAgent = async (req, res) => {
-  try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        status: false,
-        message: "Validation errors",
-        response: errors.array(),
-      });
-    }
-    const owner = req.user;
-    const { name, email, phone, user_type } = req.body;
-
-    const image = req.file ? req.file.filename : null;
-
-    const agent = await User.create({
-      name,
-      email,
-      phone,
-      user_type,
-      image,
-      business: owner.business,
-    });
-
-    return res.status(201).json({
-      status: true,
-      message: "Agent created successfully",
-      response: agent,
-    });
-  } catch (error) {
-    console.log("createAgent error:", error);
-    if (error.code === 11000) {
-      return res.status(409).json({
-        status: false,
-        message: "Email is already taken",
-        response: error.message,
-      });
-    }
-    return res.status(500).json({
-      status: false,
-      message: "Internal Server Error",
-      response: error.message,
-    });
-  }
-};
-
 const getUserById = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -374,49 +328,6 @@ const getUserById = async (req, res) => {
     });
   } catch (error) {
     console.log("getUserById error:", error);
-    return res.status(500).json({
-      status: false,
-      message: "Internal Server Error",
-      response: error.message,
-    });
-  }
-};
-
-const removeAgent = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const user = await User.findByIdAndDelete(id);
-
-    if (user?.image) {
-      const imagePath = path.join(
-        __dirname,
-        "..",
-        "uploads",
-        "users",
-        user.image,
-      );
-      if (fs.existsSync(imagePath)) {
-        fs.unlinkSync(imagePath, (err) => {
-          if (err) {
-            console.log("Error deleting image:", err);
-          }
-        });
-      }
-    }
-
-    if (!user) {
-      return res.status(400).json({
-        status: false,
-        message: "Can't remove agent",
-      });
-    }
-
-    return res.status(200).json({
-      status: true,
-      message: "Agent deleted successfully",
-    });
-  } catch (error) {
-    console.log("removeAgent error:", error);
     return res.status(500).json({
       status: false,
       message: "Internal Server Error",
@@ -482,10 +393,8 @@ module.exports = {
   sendOTP,
   verifyOTP,
   verifyPin,
-  createAgent,
   updateUser,
   getUserById,
-  removeAgent,
   logoutUser,
   createAccount,
   googleLogin,
