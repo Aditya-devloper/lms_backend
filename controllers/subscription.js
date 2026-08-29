@@ -10,22 +10,11 @@ const User = require("../models/userModel");
 const Business = require("../models/businessModel");
 
 const razorpay = new Razorpay({
-  key_id: process.env.RZP_TEST_KEY_ID,
-  key_secret: process.env.RZP_TEST_KEY_SECRET,
+  key_id: process.env.RZP_KEY_ID,
+  key_secret: process.env.RZP_KEY_SECRET,
 });
 
-const GST = Number(process.env.GST || 0);
-
-const PLAN_PRICES = {
-  INR: {
-    monthly: Number(process.env.PREMIUM_PLAN_PRICE_INR_MONTHLY),
-    yearly: Number(process.env.PREMIUM_PLAN_PRICE_INR_YEARLY),
-  },
-  USD: {
-    monthly: Number(process.env.PREMIUM_PLAN_PRICE_USD_MONTHLY),
-    yearly: Number(process.env.PREMIUM_PLAN_PRICE_USD_YEARLY),
-  },
-};
+const GST = 0;
 
 function calculateNewPlanDates(business, billing_cycle) {
   const now = new Date();
@@ -69,7 +58,25 @@ const createSubscriptionOrder = async (req, res) => {
   try {
     const user = req.user;
     const { currency = "INR", billing_cycle = "monthly" } = req.body;
-    const plan_amount = PLAN_PRICES[currency][billing_cycle];
+    const { planID } = req.body;
+
+    if (!planID) {
+      return res.status(400).json({
+        status: false,
+        message: "Plan is required",
+      });
+    }
+
+    const plan = await Plan.findOne({ _id: planID, is_active: true });
+
+    const { price: plan_amount, currency, billing_cycle } = plan;
+
+    if (!plan_amount || plan_amount <= 0) {
+      return res.status(400).json({
+        status: false,
+        message: "This plan doesn't require payment",
+      });
+    }
 
     const plan_gst = Number((plan_amount * GST).toFixed(2));
     const total_amount = Number((plan_amount + plan_gst).toFixed(2));
@@ -82,7 +89,7 @@ const createSubscriptionOrder = async (req, res) => {
       receipt: `subscription_rcpt`,
       notes: {
         businessId: user?.business.toString(),
-        plan: "premium",
+        plan: plan.name,
       },
     });
 
@@ -92,7 +99,7 @@ const createSubscriptionOrder = async (req, res) => {
       user: user?._id,
       business: user?.business,
       transaction_id,
-      plan: "premium",
+      plan: plan.name,
       plan_amount,
       plan_gst,
       total_amount,
@@ -211,7 +218,7 @@ const confirmSubscription = async (req, res) => {
     }
 
     const generated_signature = crypto
-      .createHmac("sha256", process.env.RZP_TEST_KEY_SECRET)
+      .createHmac("sha256", process.env.RZP_KEY_SECRET)
       .update(`${razorpay_order_id}|${razorpay_payment_id}`)
       .digest("hex");
 
