@@ -8,6 +8,7 @@ const csv = require("csv-parser");
 const Transaction = require("../models/transactionModel");
 const User = require("../models/userModel");
 const Business = require("../models/businessModel");
+const Plan = require("../models/planModel");
 
 const razorpay = new Razorpay({
   key_id: process.env.RZP_KEY_ID,
@@ -57,7 +58,6 @@ async function generateTransactionId() {
 const createSubscriptionOrder = async (req, res) => {
   try {
     const user = req.user;
-    const { currency = "INR", billing_cycle = "monthly" } = req.body;
     const { planID } = req.body;
 
     if (!planID) {
